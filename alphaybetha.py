@@ -4,8 +4,88 @@ Created on Thu May 30 08:33:12 2019
 
 @author: jeank
 """
+
 import re
 import copy
+# Receives:
+#   node: the current game state
+#   player_symbol: the symbol chosen by the player
+# Returns a pair (bool, symbol) representing if the game is over and which player (represented by a symbol) won
+def is_game_over_dots(node, chosen_symbol):
+    if None in node[0]:
+        return False, None
+    if node[1] == node[2]:
+        return True, None
+    elif node[1] > node[2]:
+        return True, chosen_symbol
+    else:
+        return True, alternate_symbol(chosen_symbol)
+
+# Receives:
+#   game_result: a pair returned from is_game_over_dots
+#   node: current game state
+#   is_maximizing_player_turn: a bool indicating if it's the turn of the maximizing player
+# Returns a pair (number, node) representing the evaluation of the current board state depending on the current player
+def evaluate_game_dots(game_result, node, is_maximizing_player_turn):
+    return 0, node
+
+# Receives:
+#   node: current game state
+#   chose_symbol: a character representing the current player
+# Returns a list of nodes representing the possible moves to make for the current player in the current state
+def generate_children_dots(node, chosen_symbol):
+    return []
+
+# Receives:
+#   symbol: a character representing a player
+# Returns a pair (number, node) representing the evaluation of the current board state depending on the current player
+def alternate_symbol_dots(symbol):
+    return "+" if symbol == "-" else "-"
+
+def mini_max_ab(node, is_maximizing_player_turn, chosen_symbol, alpha, beta, depth):
+    game_result = is_game_over_dots(node, chosen_symbol)
+
+    if depth == 0 or game_result[0]:
+        return evaluate_game_dots(game_result, node, is_maximizing_player_turn)
+
+    children = generate_children_dots(node, chosen_symbol)
+
+    if is_maximizing_player_turn:
+        max_score = -1000000
+        max_child = None
+
+        for child in children:
+            child_result = mini_max_ab(child, not is_maximizing_player_turn, alternate_symbol_dots(chosen_symbol), alpha, beta, depth - 1)
+
+            if child_result[0] > max_score:
+                max_child = child
+                max_score = child_result[0]
+
+            if child_result[0] > alpha:
+                alpha = child_result[0]
+            
+            if beta <= alpha:
+                break
+                
+        return max_score, max_child
+    else:
+        min_score = 1000000
+        min_child = None
+
+        for child in children:
+            child_result = mini_max_ab(child, not is_maximizing_player_turn, alternate_symbol_dots(chosen_symbol), alpha, beta, depth - 1)
+
+            if child_result[0] < min_score:
+                min_child = child
+                min_score = child_result[0]
+
+            if child_result[0] < beta:
+                beta = child_result[0]
+            
+            if beta <= alpha:
+                break
+            
+        return min_score, min_child
 
 DOT = 'O'
 LINE_SIZE = 3
@@ -238,3 +318,4 @@ def play():
         
         is_player_turn = not is_player_turn
 play()
+
